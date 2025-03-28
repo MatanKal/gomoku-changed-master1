@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane prefHeight="579.0" prefWidth="565.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.gomoku.GameController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <ImageView fx:id="boardImage" fitHeight="600" fitWidth="600" preserveRatio="false" />
+
+    <GridPane fx:id="gridPane" alignment="CENTER" maxHeight="555" maxWidth="555" minHeight="555" minWidth="555" style="-fx-background-color: transparent;">
+        <columnConstraints>
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+            <ColumnConstraints prefWidth="39" />
+        </columnConstraints>
+
+        <rowConstraints>
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+            <RowConstraints prefHeight="39" />
+        </rowConstraints>
+
+    </GridPane>
+
+</StackPane>
