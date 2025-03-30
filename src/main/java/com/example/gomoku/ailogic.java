@@ -65,55 +65,45 @@ public class ailogic {
     }
     public int[] findWinningMove() {
         Set<String> blackMoves = gameLogic.getBlackMoves();
-
-        // First check for direct winning threats (4 consecutive stones)
+        // first check for direct winning threats (4 consecutive stones)
         for (String move : blackMoves) {
-            String[] coords = move.split(",");
-            int row = Integer.parseInt(coords[0]);
-            int col = Integer.parseInt(coords[1]);
-
+            String[] moves = move.split(",");
+            int row = Integer.parseInt(moves[0]);
+            int col = Integer.parseInt(moves[1]);
             for (int[] dir : directions) {
-                // Create an array to represent positions in this direction
+                // create an array to represent positions in this direction
                 // -1=out of bounds/white, 0=empty, 1=black
-                int[] line = new int[9]; // Center position at index 4
-                line[4] = 1; // Current stone is black
-
-                // Map the line in forward direction
-                for (int i = 1; i <= 4; i++) {
+                int[] line = new int[9]; // center is at index 4
+                line[4] = 1; // current stone is black
+                for (int i = 1; i <= 4; i++) {//forward direction
                     int r = row + dir[0] * i;
                     int c = col + dir[1] * i;
-
-                    if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE ||
-                            gameLogic.getWhiteMoves().contains(r + "," + c)) {
-                        line[4+i] = -1; // Out of bounds or blocked
+                    if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE || gameLogic.getWhiteMoves().contains(r + "," + c))
+                    {
+                        line[4+i] = -1; // out of border or blocked
                     } else if (blackMoves.contains(r + "," + c)) {
-                        line[4+i] = 1; // Black stone
+                        line[4+i] = 1; // black!
                     } else {
-                        line[4+i] = 0; // Empty
+                        line[4+i] = 0; // empty
                     }
                 }
-
-                // Map the line in backward direction
-                for (int i = 1; i <= 4; i++) {
+                for (int i = 1; i <= 4; i++) {//backward direction
                     int r = row - dir[0] * i;
                     int c = col - dir[1] * i;
-
-                    if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE ||
-                            gameLogic.getWhiteMoves().contains(r + "," + c)) {
-                        line[4-i] = -1; // Out of bounds or blocked
+                    if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE || gameLogic.getWhiteMoves().contains(r + "," + c))
+                    {
+                        line[4-i] = -1; // out of border or blocked
                     } else if (blackMoves.contains(r + "," + c)) {
-                        line[4-i] = 1; // Black stone
+                        line[4-i] = 1; // black
                     } else {
-                        line[4-i] = 0; // Empty
+                        line[4-i] = 0; // empty
                     }
                 }
 
-                // Check for winning threats and return the position to play
-
-                // Check for 4 consecutive stones with an open end: BBBB_
-                for (int start = 0; start <= 4; start++) {
-                    if (countConsecutive(line, start, 4) && line[start+4] == 0) {
-                        // Calculate position to win
+                // check for a 4 pattern with an open end: OOOO_
+                for (int start = 0; start <= 4; start++)
+                {
+                    if (countConsecutive(line, start, 4) && line[start+4] == 0) {//find the winning move
                         int winPos = start + 4;
                         int winRow = row + dir[0] * (winPos - 4);
                         int winCol = col + dir[1] * (winPos - 4);
@@ -121,67 +111,51 @@ public class ailogic {
                     }
                 }
 
-                // Check for reverse pattern: _BBBB
+                // check for 4 pattern with an open start: _OOOO
                 for (int end = 8; end >= 4; end--) {
-                    if (countConsecutive(line, end-3, -4) && line[end-4] == 0) {
-                        // Calculate position to win
+                    if (countConsecutive(line, end-3, -4) && line[end-4] == 0) {//find the winning move
                         int winPos = end - 4;
                         int winRow = row + dir[0] * (winPos - 4);
                         int winCol = col + dir[1] * (winPos - 4);
                         return new int[]{winRow, winCol};
                     }
                 }
-
-                // Check for split patterns, starting with BB_BB
-                for (int start = 0; start <= 4; start++) {
-                    // Need at least 5 positions from start
-                    if (start + 4 >= line.length) continue;
-
-                    // Count total black stones and empty spots in this 5-cell window
+                for (int start = 0; start <= 4; start++) {// look for patterns with one gap like "OOO_O", "OO_OO", "O_OOO"
+                    if (start + 4 >= line.length) continue;//count black and empty spots
                     int blackCount = 0;
                     int emptyPos = -1;
-
                     for (int i = 0; i < 5; i++) {
                         int pos = start + i;
                         if (line[pos] == 1) {
                             blackCount++;
-                        } else if (line[pos] == 0) {
-                            // If we already found an empty spot, this might be a split pattern
-                            if (emptyPos != -1) {
-                                // More than one empty spot, not a direct threat
+                        } else if (line[pos] == 0) {//empty spot
+                            if (emptyPos != -1) {//not a win yet- more than one empty spot
                                 emptyPos = -1;
                                 break;
                             }
                             emptyPos = pos;
-                        } else {
-                            // Blocked by edge or white stone
+                        } else {//blocked
                             emptyPos = -1;
                             break;
                         }
                     }
-
-                    // If we found exactly 4 black stones and 1 empty spot within 5 positions
-                    if (blackCount == 4 && emptyPos != -1) {
-                        // Calculate the position to win
-                        int offset = emptyPos - 4; // How far from center
+                    if (blackCount == 4 && emptyPos != -1) {// one empty spot in a 5 cell window
+                        int offset = emptyPos - 4; // how far from center
                         int winRow = row + dir[0] * offset;
                         int winCol = col + dir[1] * offset;
                         return new int[]{winRow, winCol};
                     }
                 }
 
-                // Check for more complex patterns like _BB_BB_, BB__BB, etc.
-                // These need a longer window (6-7 positions)
+                // _OO_OO_ patterns, hard to see and needs 7 cell window like "OO_OO_O", "O_OO_OO" etc.
                 for (int start = 0; start <= 2; start++) {
-                    // Need at least 7 positions from start
                     if (start + 6 >= line.length) continue;
-
-                    // Count total black stones and empty spots in 7-cell window
+                    // count total black pieces and empty spots in 7 cell window
                     int blackCount = 0;
                     int emptyCount = 0;
                     int firstEmptyPos = -1;
-
-                    for (int i = 0; i < 7; i++) {
+                    for (int i = 0; i < 7; i++)
+                    {// count pieces and gaps in a 7-position window
                         int pos = start + i;
                         if (line[pos] == 1) {
                             blackCount++;
@@ -191,31 +165,26 @@ public class ailogic {
                             }
                             emptyCount++;
                         } else {
-                            // Blocked
+                            // blocked
                             blackCount = 0;
                             break;
                         }
                     }
-
-                    // For patterns like _OO_OO_ with many stones but with gaps
+                    // for patterns with many stones but with gaps:
                     if (blackCount >= 4 && emptyCount > 0) {
-                        // We need to identify the most critical gap to play
-
-                        // First check if there's a middle gap between 2 stones on each side
+                        // there is a pattern with a gap(gaps?)
+                        // first check if there's a middle gap between 2 stones on each side
                         for (int i = 1; i < 6; i++) {
                             int pos = start + i;
-                            if (line[pos] == 0 &&
-                                    countStonesInRange(line, start, pos-1) >= 2 &&
-                                    countStonesInRange(line, pos+1, start+6) >= 2) {
-                                // This is a critical gap like in BB_BB pattern
-                                int offset = pos - 4; // How far from center
+                            if (line[pos] == 0 && countStonesInRange(line, start, pos-1) >= 2 && countStonesInRange(line, pos+1, start+6) >= 2)
+                            {
+                                int offset = pos - 4; // how far from center
                                 int winRow = row + dir[0] * offset;
                                 int winCol = col + dir[1] * offset;
                                 return new int[]{winRow, winCol};
                             }
                         }
-
-                        // If no critical middle gap, play the first gap
+                        // if no critical middle gap, play the first gap
                         int offset = firstEmptyPos - 4;
                         int winRow = row + dir[0] * offset;
                         int winCol = col + dir[1] * offset;
@@ -324,84 +293,65 @@ public class ailogic {
                 }
             }
         }
-
-        // try cells close to the center
-        for (int d = 1; d < gameLogic.GRID_SIZE; d++) {
-            for (int i = center - d; i <= center + d; i++) {
-                for (int j = center - d; j <= center + d; j++) {
-                    if (Math.abs(i - center) == d || Math.abs(j - center) == d) {
-                        if (isValidMove(i, j)) {
-                            return new int[]{i, j};
-                        }
-                    }
-                }
-            }
-        }
         return new int[]{0, 0};
     }
-
     public int[] findBlockingMove() {
         Set<String> whiteMoves = gameLogic.getWhiteMoves();
-
-        // First check for direct winning threats (4 consecutive stones)
+        // first check for direct 4 in a row(4 consecutive pieces)
         for (String move : whiteMoves) {
-            String[] coords = move.split(",");
-            int row = Integer.parseInt(coords[0]);
-            int col = Integer.parseInt(coords[1]);
-
+            String[] moves = move.split(",");
+            int row = Integer.parseInt(moves[0]);
+            int col = Integer.parseInt(moves[1]);
             for (int[] dir : directions) {
-                // Create an array to represent positions in this direction
-                // -1=out of bounds/black, 0=empty, 1=white
-                int[] line = new int[9]; // Center position at index 4
-                line[4] = 1; // Current stone is white
+                // create an array to represent positions in this direction
+                // -1=out of border/black, 0=empty, 1=white
+                int[] line = new int[9]; // center is at index 4
+                line[4] = 1; // current piece is white
 
-                // Map the line in forward direction
+                // line = forward direction
                 for (int i = 1; i <= 4; i++) {
                     int r = row + dir[0] * i;
                     int c = col + dir[1] * i;
 
                     if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE ||
                             gameLogic.getBlackMoves().contains(r + "," + c)) {
-                        line[4+i] = -1; // Out of bounds or blocked
+                        line[4+i] = -1; // out of border or blocked
                     } else if (whiteMoves.contains(r + "," + c)) {
-                        line[4+i] = 1; // White stone
+                        line[4+i] = 1; // white!
                     } else {
-                        line[4+i] = 0; // Empty
+                        line[4+i] = 0; // empty
                     }
                 }
 
-                // Map the line in backward direction
+                // line = backward direction
                 for (int i = 1; i <= 4; i++) {
                     int r = row - dir[0] * i;
                     int c = col - dir[1] * i;
-
-                    if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE ||
-                            gameLogic.getBlackMoves().contains(r + "," + c)) {
-                        line[4-i] = -1; // Out of bounds or blocked
-                    } else if (whiteMoves.contains(r + "," + c)) {
-                        line[4-i] = 1; // White stone
-                    } else {
-                        line[4-i] = 0; // Empty
+                    if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE || gameLogic.getBlackMoves().contains(r + "," + c)) {
+                        line[4-i] = -1; // out of border or blocked
+                    }
+                    else if (whiteMoves.contains(r + "," + c))
+                    {
+                        line[4-i] = 1; // white
+                    }
+                    else
+                    {
+                        line[4-i] = 0; // empty
                     }
                 }
 
-                // Check for winning threats and return the position to block
-
-                // Check for 4 consecutive stones with an open end: OOOO_
+                // check for a 4 pattern with an open end: OOOO_
                 for (int start = 0; start <= 4; start++) {
-                    if (countConsecutive(line, start, 4) && line[start+4] == 0) {
-                        // Calculate position to block
+                    if (countConsecutive(line, start, 4) && line[start+4] == 0) { //find the blocking move
                         int blockPos = start + 4;
                         int blockRow = row + dir[0] * (blockPos - 4);
                         int blockCol = col + dir[1] * (blockPos - 4);
                         return new int[]{blockRow, blockCol};
                     }
                 }
-
-                // Check for reverse pattern: _OOOO
+                // check for 4 pattern with an open start: _OOOO
                 for (int end = 8; end >= 4; end--) {
-                    if (countConsecutive(line, end-3, -4) && line[end-4] == 0) {
-                        // Calculate position to block
+                    if (countConsecutive(line, end-3, -4) && line[end-4] == 0) {//find the blocking move
                         int blockPos = end - 4;
                         int blockRow = row + dir[0] * (blockPos - 4);
                         int blockCol = col + dir[1] * (blockPos - 4);
@@ -409,56 +359,43 @@ public class ailogic {
                     }
                 }
 
-                // Check for split patterns, starting with OO_OO
+                // look for patterns with one gap like OOO_O, OO_OO, O_OOO
                 for (int start = 0; start <= 4; start++) {
-                    // Need at least 5 positions from start
-                    if (start + 4 >= line.length) continue;
-
-                    // Count total white stones and empty spots in this 5-cell window
+                    if (start + 4 >= line.length) continue;//count white and empty spots
                     int whiteCount = 0;
                     int emptyPos = -1;
-
                     for (int i = 0; i < 5; i++) {
                         int pos = start + i;
                         if (line[pos] == 1) {
                             whiteCount++;
-                        } else if (line[pos] == 0) {
-                            // If we already found an empty spot, this might be a split pattern
-                            if (emptyPos != -1) {
-                                // More than one empty spot, not a direct threat
+                        } else if (line[pos] == 0) {//empty spot
+                            if (emptyPos != -1) {//not a threat yet- more than one empty spot
                                 emptyPos = -1;
                                 break;
                             }
                             emptyPos = pos;
-                        } else {
-                            // Blocked by edge or black stone
+                        } else {//blocked
                             emptyPos = -1;
                             break;
                         }
                     }
 
-                    // If we found exactly 4 white stones and 1 empty spot within 5 positions
-                    if (whiteCount == 4 && emptyPos != -1) {
-                        // Calculate the position to block
-                        int offset = emptyPos - 4; // How far from center
+                    if (whiteCount == 4 && emptyPos != -1) {// one empty spot in a 5 cell window
+                        int offset = emptyPos - 4; // how far from center
                         int blockRow = row + dir[0] * offset;
                         int blockCol = col + dir[1] * offset;
                         return new int[]{blockRow, blockCol};
                     }
                 }
 
-                // Check for more complex patterns like _OO_OO_, OO__OO, etc.
-                // These need a longer window (6-7 positions)
+                // _OO_OO_ patterns, hard to see and needs 7 cell window like "OO_OO_O", "O_OO_OO" etc.
                 for (int start = 0; start <= 2; start++) {
-                    // Need at least 7 positions from start
                     if (start + 6 >= line.length) continue;
-
-                    // Count total white stones and empty spots in 7-cell window
+                    // count total white pieces and empty spots in 7 cell window
                     int whiteCount = 0;
                     int emptyCount = 0;
                     int firstEmptyPos = -1;
-
-                    for (int i = 0; i < 7; i++) {
+                    for (int i = 0; i < 7; i++) {// count pieces and gaps in a 7-position window
                         int pos = start + i;
                         if (line[pos] == 1) {
                             whiteCount++;
@@ -468,32 +405,27 @@ public class ailogic {
                             }
                             emptyCount++;
                         } else {
-                            // Blocked
+                            // blocked
                             whiteCount = 0;
                             break;
                         }
                     }
 
-                    // For patterns like _OO_OO_ with many stones but with gaps
+                    // for patterns with many stones but with gaps:
                     if (whiteCount >= 4 && emptyCount > 0) {
-                        // We need to identify the most critical gap to block
-
-                        // First check if there's a middle gap between 2 stones on each side
+                        // there is a pattern with a gap(gaps?)
+                        // first check if there's a middle gap between 2 stones on each side
                         for (int i = 1; i < 6; i++) {
                             int pos = start + i;
-                            if (line[pos] == 0 &&
-                                    countStonesInRange(line, start, pos-1) >= 2 &&
+                            if (line[pos] == 0 && countStonesInRange(line, start, pos-1) >= 2 &&
                                     countStonesInRange(line, pos+1, start+6) >= 2) {
-
-                                // This is a critical gap like in OO_OO pattern
-                                int offset = pos - 4; // How far from center
+                                int offset = pos - 4; // how far from center
                                 int blockRow = row + dir[0] * offset;
                                 int blockCol = col + dir[1] * offset;
                                 return new int[]{blockRow, blockCol};
                             }
                         }
-
-                        // If no critical middle gap, block the first gap
+                        // if no critical middle gap, block the first gap
                         int offset = firstEmptyPos - 4;
                         int blockRow = row + dir[0] * offset;
                         int blockCol = col + dir[1] * offset;
@@ -505,7 +437,7 @@ public class ailogic {
         return null;
     }
 
-    // Helper method to count consecutive stones
+    // helper function to count consecutive stones
     private boolean countConsecutive(int[] line, int start, int count) {
         if (count > 0) {
             for (int i = 0; i < count; i++) {
@@ -523,7 +455,7 @@ public class ailogic {
         return true;
     }
 
-    // Helper method to count stones in a range
+    // helper function to count stones in a range
     private int countStonesInRange(int[] line, int start, int end) {
         int count = 0;
         for (int i = start; i <= end; i++) {
