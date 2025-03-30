@@ -197,7 +197,7 @@ public class ailogic {
                         }
                     }
 
-                    // For patterns like _BB_BB_ with many stones but with gaps
+                    // For patterns like _OO_OO_ with many stones but with gaps
                     if (blackCount >= 4 && emptyCount > 0) {
                         // We need to identify the most critical gap to play
 
@@ -207,7 +207,6 @@ public class ailogic {
                             if (line[pos] == 0 &&
                                     countStonesInRange(line, start, pos-1) >= 2 &&
                                     countStonesInRange(line, pos+1, start+6) >= 2) {
-
                                 // This is a critical gap like in BB_BB pattern
                                 int offset = pos - 4; // How far from center
                                 int winRow = row + dir[0] * offset;
