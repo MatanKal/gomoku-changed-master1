@@ -1,5 +1,4 @@
 package com.example.gomoku;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,13 +12,13 @@ public class ailogic {
     }
 
     public int[] aiMove() { // logic for the game
-
         // DIFFERENT GAME STATES:
         // 1 GAME START
         // start of the game
         if (gameLogic.getBlackMoves().size() <= 2 && gameLogic.getWhiteMoves().size() <= 2) {
             return earlyGameMove();
-        } // a move that wins the game
+        }
+        // a move that wins the game
         // 2WINNING MOVE
         int[] winningMove = findWinningMove();
         if (winningMove != null) {
@@ -37,33 +36,27 @@ public class ailogic {
         if (nextMoveWin != null) {
             return nextMoveWin;
         }
-        // 5 BLOCK PAYER WIN NEXT TURN - PLAYER has "OPEN THREE"
-        // wihtout blocking - loss is guaranteed next turn
+        // 5 BLOCK PLAYER WIN NEXT TURN - PLAYER has "OPEN THREE"
+        // without blocking - loss is guaranteed next turn
         int[] nextMoveBlock = findNextMoveBlock();
         if (nextMoveBlock != null) {
             return nextMoveBlock;
         }
         // 6 STRATEGIC MOVE
-        // create neighbors set -  DO NOT CHECK ALL THE BOARD!!!
-        // only balck and white pieces!
-        // the best possible move - from the neghbors set
-        //check which move is best according to patterns.
-        // ONGOING GAME
-        // check sequence
         int[] strategicMove = findStrategicMove();
         if (strategicMove != null) {
             return strategicMove;
         }
         return findRandomMove();
     }
-    public boolean isValidMove(int row, int col) { // checker for outside bounderies and if the move is already made
+    private boolean isValidMove(int row, int col) { // checker for outside bounderies and if the move is already made
         if (row < 0 || row >= gameLogic.GRID_SIZE || col < 0 || col >= gameLogic.GRID_SIZE) {
             return false;
         }
         String move = row + "," + col;
         return !gameLogic.getBlackMoves().contains(move) && !gameLogic.getWhiteMoves().contains(move);
     }
-    public int[] findWinningMove() {
+    private int[] findWinningMove() {
         Set<String> blackMoves = gameLogic.getBlackMoves();
         // first check for direct winning threats (4 consecutive stones)
         for (String move : blackMoves) {
@@ -196,17 +189,17 @@ public class ailogic {
         return null;
     }
 
-    public int[] findNextMoveWin() {
+    private int[] findNextMoveWin() {
         Set<String> blackMoves = gameLogic.getBlackMoves();
         for (String move : blackMoves) {
             String[] moveS = move.split(",");
             int row = Integer.parseInt(moveS[0]);
             int col = Integer.parseInt(moveS[1]);
-            for (int[] dir : directions) {
+            for (int[] dir : directions) {// search for opened 3 in a row
                 int consecutiveCount = 1;
                 int[] openSpots = new int[2];
                 int openSpotCount = 0;
-                for (int i = 1; i < 4; i++) {
+                for (int i = 1; i < 4; i++) {// forward direction
                     int r = row + dir[0] * i;
                     int c = col + dir[1] * i;
                     if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE) {
@@ -221,7 +214,7 @@ public class ailogic {
                         break;
                     }
                 }
-                for (int i = 1; i < 4; i++) {
+                for (int i = 1; i < 4; i++) {// backward direction
                     int r = row - dir[0] * i;
                     int c = col - dir[1] * i;
                     if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE) {
@@ -245,7 +238,7 @@ public class ailogic {
         return null;
     }
 
-    public int[] earlyGameMove() { // 2 first moves
+    private int[] earlyGameMove() { // 2 first moves
         if (gameLogic.getBlackMoves().isEmpty() && !gameLogic.getWhiteMoves().contains("6,6")) {
             return new int[]{5, 6};
         } else if (gameLogic.getLastMove().isEmpty()) {
@@ -295,7 +288,7 @@ public class ailogic {
         }
         return new int[]{0, 0};
     }
-    public int[] findBlockingMove() {
+    private int[] findBlockingMove() {
         Set<String> whiteMoves = gameLogic.getWhiteMoves();
         // first check for direct 4 in a row(4 consecutive pieces)
         for (String move : whiteMoves) {
@@ -439,13 +432,13 @@ public class ailogic {
 
     // helper function to count consecutive stones
     private boolean countConsecutive(int[] line, int start, int count) {
-        if (count > 0) {
+        if (count > 0) {// casees like OOOO_
             for (int i = 0; i < count; i++) {
                 if (start + i >= line.length || line[start + i] != 1) {
                     return false;
                 }
             }
-        } else {
+        } else {// for cases like _OOOO to go backwards
             for (int i = 0; i > count; i--) {
                 if (start + i < 0 || line[start + i] != 1) {
                     return false;
@@ -465,7 +458,7 @@ public class ailogic {
         }
         return count;
     }
-    public int[] findNextMoveBlock() {
+    private int[] findNextMoveBlock() {
         Set<String> whiteMoves = gameLogic.getWhiteMoves();
         for (String move : whiteMoves) {
             String[] coords = move.split(",");
@@ -475,7 +468,7 @@ public class ailogic {
                 int consecutiveCount = 1;
                 int[] openSpots = new int[2];
                 int openSpotCount = 0;
-                for (int i = 1; i < 4; i++) {
+                for (int i = 1; i < 4; i++) {// forward direction
                     int r = row + dir[0] * i;
                     int c = col + dir[1] * i;
                     if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE) {
@@ -490,7 +483,7 @@ public class ailogic {
                         break;
                     }
                 }
-                for (int i = 1; i < 4; i++) {
+                for (int i = 1; i < 4; i++) {// backward direction
                     int r = row - dir[0] * i;
                     int c = col - dir[1] * i;
                     if (r < 0 || r >= gameLogic.GRID_SIZE || c < 0 || c >= gameLogic.GRID_SIZE) {
@@ -513,24 +506,11 @@ public class ailogic {
         }
         return null;
     }
-    // SET<String> neighbors  ->all available neighbors!
-    // for all blackpieces set : get the neighors that are VALID(EMPTY) and add to neighbors SET
-    // for each of the neighbors set check best pattern !!! this is  the move to DO.
+    // for each of the neighbors set check best pattern
     private int[] findStrategicMove() {
         Set<String> neighborPositions = new HashSet<>();
         findNeighborPositions(gameLogic.getBlackMoves(), neighborPositions);
-        int bestScore = -1;
-        int[] bestMove = null;
-        for (String position : neighborPositions) {
-            String[] moves = position.split(",");
-            int row = Integer.parseInt(moves[0]);
-            int col = Integer.parseInt(moves[1]);
-            int score = evaluateMove(row, col);
-            if (score > bestScore) {
-                bestScore = score;
-                bestMove = new int[]{row, col};
-            }
-        }
+        int[] bestMove = bestMove(neighborPositions);
         return bestMove != null ? bestMove : findRandomMove();
     }
 
@@ -539,36 +519,43 @@ public class ailogic {
             String[] moves = piece.split(",");
             int row = Integer.parseInt(moves[0]);
             int col = Integer.parseInt(moves[1]);
-            for (int r = -1; r <= 1; r++) {
-                for (int c = -1; c <= 1; c++) {
-                    if (r == 0 && c == 0) continue;
-                    int newRow = row + r;
-                    int newCol = col + c;
-                    if (isValidMove(newRow, newCol)) {
-                        neighborPositions.add(newRow + "," + newCol);
-                    }
+            int newRow, newCol;
+            for (int[] dir : directions) {
+                newRow = row + dir[0];
+                newCol = col + dir[1];
+                if (isValidMove(newRow, newCol)) {
+                    neighborPositions.add(newRow + "," + newCol);
+                }
+                newRow = row - dir[0];
+                newCol = col - dir[1];
+                if (isValidMove(newRow, newCol)) {
+                    neighborPositions.add(newRow + "," + newCol);
                 }
             }
         }
     }
 
-    public int evaluateMove(int row, int col) {
-        int score = 0;
+    private int[] bestMove(Set<String> neighborPositions) {
         Set<String> blackMoves = new HashSet<>(gameLogic.getBlackMoves());
-        blackMoves.add(row + "," + col);
-        // score pattern creation
-        if (wouldCreatePattern(row, col, blackMoves, "LiveFour")) score += 100;
-        else if (wouldCreatePattern(row, col, blackMoves, "DeadFour")) score += 50;
-        else if (wouldCreatePattern(row, col, blackMoves, "LiveThree")) score += 30;
-        else if (wouldCreatePattern(row, col, blackMoves, "DeadThree")) score += 10;
-        else if (wouldCreatePattern(row, col, blackMoves, "LiveTwo")) score += 5;
+        int[] bestMove = null;
+        String bestPattern = null;
+        for (String position : neighborPositions) {
+            String[] moves = position.split(",");
+            int moveRow = Integer.parseInt(moves[0]);
+            int moveCol = Integer.parseInt(moves[1]);
+            String currentPattern = null;
+            if (wouldCreatePattern(moveRow, moveCol, blackMoves, "DeadFour")) currentPattern = "DeadFour";
+            else if (wouldCreatePattern(moveRow, moveCol, blackMoves, "LiveThree")) currentPattern = "LiveThree";
+            else if (wouldCreatePattern(moveRow, moveCol, blackMoves, "DeadThree")) currentPattern = "DeadThree";
+            else if (wouldCreatePattern(moveRow, moveCol, blackMoves, "LiveTwo")) currentPattern = "LiveTwo";
+            else if (wouldCreatePattern(moveRow, moveCol, blackMoves, "DeadTwo")) currentPattern = "DeadTwo";
 
-        // extra if closer to middle
-        int center = gameLogic.GRID_SIZE / 2;
-        int distanceFromCenter = Math.abs(row - center) + Math.abs(col - center);
-        score += Math.max(0, 10 - distanceFromCenter);
-
-        return score;
+            if (currentPattern != null && (bestPattern == null || gameLogic.isBetterPattern(currentPattern, bestPattern))) {
+                bestPattern = currentPattern;
+                bestMove = new int[]{moveRow, moveCol};
+            }
+        }
+        return bestMove;
     }
 
     private boolean wouldCreatePattern(int row, int col, Set<String> playerMoves, String targetPattern) {
@@ -623,7 +610,7 @@ public class ailogic {
         }
         return false;
     }
-    public int[] CloseBorderInteraction(int row, int col) { // check if player is near the border
+    private int[] CloseBorderInteraction(int row, int col) { // check if player is near the border
         int[] result = new int[]{row, col};
 
         // corner checkers
