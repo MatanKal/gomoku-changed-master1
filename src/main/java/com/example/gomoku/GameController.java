@@ -25,7 +25,7 @@ public class GameController {
     public ImageView boardImage;
 
     @FXML
-    public void initialize() {
+    private void initialize() {
         Image image = new Image(getClass().getResourceAsStream("board.jpg"));
         boardImage.setImage(image);
         setupBoard();
@@ -104,7 +104,6 @@ public class GameController {
            // resetGame();
             return;
         }
-
         logic.changeTurn();
     }
 

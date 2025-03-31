@@ -57,13 +57,11 @@ public class gameLogic {
             }
 
             if (count >= 5) {
-                return BMoves.contains(move) ? 'B' : 'W'; // Return the winner
+                return BMoves.contains(move) ? 'B' : 'W'; // return the winner
             }
         }
         return ' ';
     }
-
-
     public String StatePosition(int row, int col) {
         String move = row + "," + col;
         Set<String> playerMoves = BMoves.contains(move) ? BMoves : WMoves;
@@ -109,7 +107,7 @@ public class gameLogic {
                 return pattern;
             }
 
-            if (pattern != null && (bestPattern == null || hasHigherPriority(pattern, bestPattern))) {
+            if (pattern != null && (bestPattern == null || isBetterPattern(pattern, bestPattern))) {
                 bestPattern = pattern;
             }
         }
@@ -118,27 +116,31 @@ public class gameLogic {
     }
 
 
-    private boolean hasHigherPriority(String pattern1, String pattern2) {
-        int priority1 = getPatternPriority(pattern1);
-        int priority2 = getPatternPriority(pattern2);
-        return priority1 > priority2;
+    public boolean isBetterPattern(String pattern1, String pattern2) {
+        if (pattern1 == null) return false;
+        if (pattern2 == null) return true;
+        if (pattern1.equals("FiveInARow")) return true;
+        if (pattern2.equals("FiveInARow")) return false;
+
+        if (pattern1.equals("LiveFour")) return true;
+        if (pattern2.equals("LiveFour")) return false;
+
+        if (pattern1.equals("DeadFour")) return true;
+        if (pattern2.equals("DeadFour")) return false;
+
+        if (pattern1.equals("LiveThree")) return true;
+        if (pattern2.equals("LiveThree")) return false;
+
+        if (pattern1.equals("DeadThree")) return true;
+        if (pattern2.equals("DeadThree")) return false;
+
+        if (pattern1.equals("LiveTwo")) return true;
+        if (pattern2.equals("LiveTwo")) return false;
+        return false;
     }
 
 
-    private int getPatternPriority(String pattern) {
-        if (pattern == null) return -1;
 
-        switch (pattern) {
-            case "FiveInARow": return 10000;
-            case "LiveFour": return 1000;
-            case "DeadFour": return 50;
-            case "LiveThree": return 30;
-            case "DeadThree": return 10;
-            case "LiveTwo": return 5;
-            case "DeadTwo": return 0;
-            default: return -1;
-        }
-    }
 
 
     public boolean isInBounds(int row, int col) {
