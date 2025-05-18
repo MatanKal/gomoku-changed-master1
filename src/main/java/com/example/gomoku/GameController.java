@@ -20,7 +20,6 @@ public class GameController {
     private static final double CELL_SIZE = 39;
     private gameLogic logic = new gameLogic();
     private ailogic ai = new ailogic(logic);
-
     @FXML
     public ImageView boardImage;
 
@@ -101,7 +100,7 @@ public class GameController {
         char winner = logic.checkWin(aiMove[0], aiMove[1]);
         if (winner == 'W' || winner == 'B') {
             showWinnerAlert(winner == 'B' ? 1 : 2);
-           // resetGame();
+           resetGame();
             return;
         }
         logic.changeTurn();
@@ -115,9 +114,11 @@ public class GameController {
         alert.showAndWait();
     }
 
-   /* private void resetGame() {
+    private void resetGame() {
+        // new game
         gridPane.getChildren().clear();
         logic = new gameLogic();
+        ai = new ailogic(logic);
         initialize();
-    }*/
+    }
 }

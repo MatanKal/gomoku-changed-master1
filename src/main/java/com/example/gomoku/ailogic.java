@@ -7,11 +7,11 @@ public class ailogic {
     private gameLogic gameLogic;
     private int[][] directions = {{1, 0}, {0, 1}, {1, 1}, {1, -1}};
 
-    public ailogic(gameLogic gameLogic) {
+    public ailogic(gameLogic gameLogic) { // O(1)builder
         this.gameLogic = gameLogic;
     }
 
-    public int[] aiMove() { // logic for the game
+    public int[] aiMove() { // logic for the game O(n)
         // DIFFERENT GAME STATES:
         // 1 GAME START
         // start of the game
@@ -49,14 +49,14 @@ public class ailogic {
         }
         return findRandomMove();
     }
-    private boolean isValidMove(int row, int col) { // checker for outside bounderies and if the move is already made
+    private boolean isValidMove(int row, int col) { // checker for outside bounderies and if the move is already made O(1)
         if (row < 0 || row >= gameLogic.GRID_SIZE || col < 0 || col >= gameLogic.GRID_SIZE) {
             return false;
         }
         String move = row + "," + col;
         return !gameLogic.getBlackMoves().contains(move) && !gameLogic.getWhiteMoves().contains(move);
     }
-    private int[] findWinningMove() {
+    private int[] findWinningMove() { // O(n)
         Set<String> blackMoves = gameLogic.getBlackMoves();
         // first check for direct winning threats (4 consecutive stones)
         for (String move : blackMoves) {
@@ -189,14 +189,14 @@ public class ailogic {
         return null;
     }
 
-    private int[] findNextMoveWin() {
+    private int[] findNextMoveWin() { // O(n)
         Set<String> blackMoves = gameLogic.getBlackMoves();
         for (String move : blackMoves) {
             String[] moveS = move.split(",");
             int row = Integer.parseInt(moveS[0]);
             int col = Integer.parseInt(moveS[1]);
             for (int[] dir : directions) {
-                // Checking for consecutive patterns
+                // Checking for consecutive patterns like _OOO_
                 int consecutiveCount = 1;
                 int[] openSpots = new int[2];
                 int openSpotCount = 0;
@@ -235,10 +235,10 @@ public class ailogic {
                     return new int[]{pos / 100, pos % 100};
                 }
 
-                // Checking for patterns with gaps (fixed for 7-length array, center at 3)
+                // Checking for patterns with gaps _OO_O_
                 int[] line = new int[7];
-                line[3] = 1;
-                for (int i = 1; i <= 3; i++) {
+                line[3] = 1; // current game piece is black(ai) 0=open -1 = blocked
+                for (int i = 1; i <= 3; i++) {//forward direction
                     int r = row + dir[0] * i;
                     int c = col + dir[1] * i;
                     int idx = 3 + i;
@@ -269,12 +269,11 @@ public class ailogic {
                     }
                 }
 
-                for (int start = 0; start <= 1; start++) { // only start=0,1 for window size 6 in array of 7
+                for (int start = 0; start <= 1; start++) { // only start=0-1 because searching for 6 in an array of 7
                     // _O_OO_ pattern check
                     if (line[start] == 0 && line[start+1] == 1 && line[start+2] == 0 &&
                             line[start+3] == 1 && line[start+4] == 1 && line[start+5] == 0 &&
                             countStonesInRange(line, start, start+5) == 3) {
-
                         int gapPos = start + 2;
                         int moveRow = row + dir[0] * (gapPos - 3);
                         int moveCol = col + dir[1] * (gapPos - 3);
@@ -282,12 +281,10 @@ public class ailogic {
                             return new int[]{moveRow, moveCol};
                         }
                     }
-
                     // _OO_O_ pattern check
                     if (line[start] == 0 && line[start+1] == 1 && line[start+2] == 1 &&
                             line[start+3] == 0 && line[start+4] == 1 && line[start+5] == 0 &&
                             countStonesInRange(line, start, start+5) == 3) {
-
                         int gapPos = start + 3;
                         int moveRow = row + dir[0] * (gapPos - 3);
                         int moveCol = col + dir[1] * (gapPos - 3);
@@ -311,17 +308,14 @@ public class ailogic {
         String[] lastMove = gameLogic.getLastMove().split(",");
         int lastRow = Integer.parseInt(lastMove[0]);
         int lastCol = Integer.parseInt(lastMove[1]);
-
         // check if player played near the border
         if (lastRow <= 3 || lastCol <= 3 || lastRow >= 9 || lastCol >= 9) {
             return CloseBorderInteraction(lastRow, lastCol);
         }
-
         // find an open spot near the last move
         for (int[] dir : directions) {
             int newRow = lastRow + dir[0];
             int newCol = lastCol + dir[1];
-
             if (isValidMove(newRow, newCol)) {
                 return new int[]{newRow, newCol};
             }
@@ -494,7 +488,7 @@ public class ailogic {
     }
 
     // helper function to count consecutive stones
-    private boolean countConsecutive(int[] line, int start, int count) {
+    private boolean countConsecutive(int[] line, int start, int count) { // O(1)
         if (count > 0) {// casees like OOOO_
             for (int i = 0; i < count; i++) {
                 if (start + i >= line.length || line[start + i] != 1) {
@@ -512,7 +506,7 @@ public class ailogic {
     }
 
     // helper function to count stones in a range
-    private int countStonesInRange(int[] line, int start, int end) {
+    private int countStonesInRange(int[] line, int start, int end) { // O(1)
         int count = 0;
         for (int i = start; i <= end; i++) {
             if (line[i] == 1) {
@@ -521,14 +515,14 @@ public class ailogic {
         }
         return count;
     }
-    private int[] findNextMoveBlock() {
+    private int[] findNextMoveBlock() { // O(n)
         Set<String> whiteMoves = gameLogic.getWhiteMoves();
         for (String move : whiteMoves) {
             String[] coords = move.split(",");
             int row = Integer.parseInt(coords[0]);
             int col = Integer.parseInt(coords[1]);
             for (int[] dir : directions) {
-                // Checking for consecutive patterns
+                // checking for consecutive patterns
                 int consecutiveCount = 1;
                 int[] openSpots = new int[2];
                 int openSpotCount = 0;
@@ -567,10 +561,10 @@ public class ailogic {
                     return new int[]{pos / 100, pos % 100};
                 }
 
-                // Checking for patterns with gaps (fixed for 7-length array, center at 3)
+                // filling the array with 7 pieces
                 int[] line = new int[7];
                 line[3] = 1;
-                for (int i = 1; i <= 3; i++) {
+                for (int i = 1; i <= 3; i++) { // 3 forward
                     int r = row + dir[0] * i;
                     int c = col + dir[1] * i;
                     int idx = 3 + i;
@@ -585,7 +579,7 @@ public class ailogic {
                         }
                     }
                 }
-                for (int i = 1; i <= 3; i++) {
+                for (int i = 1; i <= 3; i++) { // 3 backward
                     int r = row - dir[0] * i;
                     int c = col - dir[1] * i;
                     int idx = 3 - i;
@@ -601,12 +595,12 @@ public class ailogic {
                     }
                 }
 
-                for (int start = 0; start <= 1; start++) { // only start=0,1 for window size 6 in array of 7
+                for (int start = 0; start <= 1; start++) { // only start=0-1 because searching for 6 in an array of 7  (could be _OO_O_ or even OO_O_)
                     // _O_OO_ pattern check
                     if (line[start] == 0 && line[start+1] == 1 && line[start+2] == 0 &&
                             line[start+3] == 1 && line[start+4] == 1 && line[start+5] == 0 &&
-                            countStonesInRange(line, start, start+5) == 3) {
-
+                            countStonesInRange(line, start, start+5) == 3)
+                    {
                         int gapPos = start + 2;
                         int moveRow = row + dir[0] * (gapPos - 3);
                         int moveCol = col + dir[1] * (gapPos - 3);
@@ -619,7 +613,6 @@ public class ailogic {
                     if (line[start] == 0 && line[start+1] == 1 && line[start+2] == 1 &&
                             line[start+3] == 0 && line[start+4] == 1 && line[start+5] == 0 &&
                             countStonesInRange(line, start, start+5) == 3) {
-
                         int gapPos = start + 3;
                         int moveRow = row + dir[0] * (gapPos - 3);
                         int moveCol = col + dir[1] * (gapPos - 3);
@@ -633,14 +626,14 @@ public class ailogic {
         return null;
     }
     // for each of the neighbors set check best pattern
-    private int[] findStrategicMove() {
+    private int[] findStrategicMove() { // O(n)
         Set<String> neighborPositions = new HashSet<>();
         findNeighborPositions(gameLogic.getBlackMoves(), neighborPositions);
         int[] bestMove = bestMove(neighborPositions);
         return bestMove != null ? bestMove : findRandomMove();
     }
 
-    private void findNeighborPositions(Set<String> pieces, Set<String> neighborPositions) {
+    private void findNeighborPositions(Set<String> pieces, Set<String> neighborPositions) { // O(n)
         for (String piece : pieces) {
             String[] moves = piece.split(",");
             int row = Integer.parseInt(moves[0]);
