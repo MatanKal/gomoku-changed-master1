@@ -56,9 +56,9 @@ public class ailogic {
         String move = row + "," + col;
         return !gameLogic.getBlackMoves().contains(move) && !gameLogic.getWhiteMoves().contains(move);
     }
-    private int[] findWinningMove() { // O(n)
+    private int[] findWinningMove() { // O(n)/O(n^2)
         Set<String> blackMoves = gameLogic.getBlackMoves();
-        // first check for direct winning threats (4 consecutive stones)
+        // first check for direct winning threats (4 consecutive pieces)
         for (String move : blackMoves) {
             String[] moves = move.split(",");
             int row = Integer.parseInt(moves[0]);
@@ -67,7 +67,7 @@ public class ailogic {
                 // create an array to represent positions in this direction
                 // -1=out of bounds/white, 0=empty, 1=black
                 int[] line = new int[9]; // center is at index 4
-                line[4] = 1; // current stone is black
+                line[4] = 1; // current piece is black
                 for (int i = 1; i <= 4; i++) {//forward direction
                     int r = row + dir[0] * i;
                     int c = col + dir[1] * i;
@@ -140,7 +140,7 @@ public class ailogic {
                     }
                 }
 
-                // _OO_OO_ patterns, hard to see and needs 7 cell window like "OO_OO_O", "O_OO_OO" etc.
+                // _OO_OO_ patterns, hard to see and needs 7 cell window
                 for (int start = 0; start <= 2; start++) {
                     if (start + 6 >= line.length) continue;
                     // count total black pieces and empty spots in 7 cell window
@@ -163,7 +163,7 @@ public class ailogic {
                             break;
                         }
                     }
-                    // for patterns with many stones but with gaps:
+                    // for patterns with many stones but with gaps: like "OO_OO_O", "O_OO_OO" or else that needs to have the critical ones blocked not just the first one seen
                     if (blackCount >= 4 && emptyCount > 0) {
                         // there is a pattern with a gap(gaps?)
                         // first check if there's a middle gap between 2 stones on each side
